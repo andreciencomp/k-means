@@ -1,7 +1,6 @@
 package br.com.kmeans;
 
 public class Data {
-	
 
 	private double[] values;
 	
@@ -25,7 +24,6 @@ public class Data {
 	}
 	
 	public void printData() {
-
         for (double value : values) {
             System.out.print(value + " ");
         }
@@ -35,14 +33,11 @@ public class Data {
 	}
 	@Override
 	public boolean equals(Object other) {
-		
 		for(int i=0;i<values.length;i++) {
-			
 			if(this.values[i] != ((Data)other).getValues()[i]) {
 				return false;
 			}
 		}
-		
 		return true;
 	}
 }

@@ -7,23 +7,21 @@ public class KMeans {
 	private Centroid[] centroids;
 	private int[] objectsPerClass;
 	private long timeStart;
-	private long timeFininshed;
+	private long timeFinished;
+	private long elapsedTime;
 	private double[] sumValuesData;
 	private final int numCentroids;
+	private KmeansExecutionMode executionMode;
 
-	// Este construtor gera k centroides aleatórios
+	// Este construtor gera k centroides
 	public KMeans(int k, double[][] valuesDataSet) {
 		numCentroids = k;
-		// Quantos valores há em cada dado do dataset
 		this.centroids = new Centroid[k];
 		this.objectsPerClass = new int[k];
-
-		// Obtém os centroids a partir dos primeiros k dados do dataset
 		for (int i = 0; i < k; i++) {
 			Centroid centroid = new Centroid(i + 1, valuesDataSet[i].clone());
 			centroids[i] = centroid;
 		}
-
 		this.dataSet = new DataSet(valuesDataSet);
 		this.sumValuesData = dataSet.getSumValuesData();
 	}
@@ -47,11 +45,10 @@ public class KMeans {
 		double totalPercent = 0;
 		int totalDatas = 0;
 		for (int i = 0; i < centroids.length; i++) {
-			double percent = (100.0 * ((double) objectsPerClass[i])) / ((double) this.dataSet.getNumDatas());
+			double percent = (100.0 * ((double) objectsPerClass[i])) / ((double) this.dataSet.getDataAmount());
 			totalPercent += percent;
 			totalDatas += objectsPerClass[i];
 			System.out.println("Classe " + (i + 1) + ": " + objectsPerClass[i] + " dados - " + percent + "%");
-
 		}
 		System.out.printf("Quantidade de dados: %d %.3f%% \n",totalDatas, totalPercent);
 	}
@@ -61,32 +58,29 @@ public class KMeans {
 	}
 
 	public void startSerial() {
-
+		executionMode = KmeansExecutionMode.SERIAL;
 		timeStart = System.currentTimeMillis();
 		System.out.println("*MODO SERIAL INICIADO*");
-		int numberOfIteractions = 0;
+		int numberOfIterations = 0;
 		boolean centroidChanged = true;
 		while (centroidChanged) {
 			resetObjectsPerClass();
-			numberOfIteractions++;
-			System.out.print("Iteração " + numberOfIteractions  + ": ");
+			numberOfIterations++;
+			System.out.print("Iteração " + numberOfIterations  + ": ");
 
-			calculateClass(0, dataSet.getDatas().length - 1);
+			calculateClass(0, dataSet.getDataAmount() - 1);
 
 			centroidChanged = false;
 			int centroidsModificados = 0;
 			for (int i = 0; i < this.centroids.length; i++) {
-
 				boolean changed = centroids[i].updateNewPosition();
 				objectsPerClass[i] = centroids[i].getNumDatas();
 				if (changed) {
 					centroidChanged = true;
 					centroidsModificados++;
 				}
-
 			}
 			System.out.println(centroidsModificados + " centroids modificados");
-
 
 			for (Centroid c : centroids) {
 				c.resetValuesTemp();
@@ -94,13 +88,8 @@ public class KMeans {
 
 		}
 		System.out.println();
-		timeFininshed = System.currentTimeMillis();
-		long duration = (timeFininshed - timeStart) / 1000;
-		System.out.println("FIM DO ALGORÍTIMO");
-		System.out.println("Executado em " + duration + " segundos");
-		
-		// dataSet.print();
-
+		timeFinished = System.currentTimeMillis();
+		elapsedTime = timeFinished - timeStart;
 	}
 
 	public Centroid[] getCentroids() {
@@ -108,41 +97,35 @@ public class KMeans {
 	}
 
 	public void startConcurrent(int numberOfThreads) {
+		executionMode = KmeansExecutionMode.CONCURRENT;
 		int numberOfInteractions = 0;
 		System.out.println("--- MODO CONCORRENTE INICIADO---");
 		timeStart = System.currentTimeMillis();
-		// Calcula quantos dados cada Thread ira processar
-		int dataPerThread = (int) Math.floor((float) dataSet.getNumDatas() / (float) numberOfThreads);
+		int dataPerThread = (int) Math.floor((float) dataSet.getDataAmount() / (float) numberOfThreads);
 		boolean centroidChanged = true;
-		ThreadClassCalculator classifierThreads[] = new ThreadClassCalculator[numberOfThreads];
+		ThreadClassCalculator[] classifierThreads = new ThreadClassCalculator[numberOfThreads];
 		while (centroidChanged) {
 			numberOfInteractions++;
-			System.out.print("Iteraçao " + numberOfInteractions);
+			System.out.print("Iteração " + numberOfInteractions);
 			resetObjectsPerClass();
 			int idxInf = 0;
 			int idxSup = 0;
 			for (int i = 0; i < numberOfThreads; i++) {
-
 				if (i == numberOfThreads - 1) {
-					idxSup = dataSet.getNumDatas() - 1;
+					idxSup = dataSet.getDataAmount() - 1;
 				} else {
 					idxSup = idxInf + dataPerThread - 1;
 				}
-
 				ThreadClassCalculator classifier = new ThreadClassCalculator(this, idxInf, idxSup);
 				classifierThreads[i] = classifier;
 				idxInf = idxSup + 1;
 			}
 
-			// Iniciando o funcionamento das Threads
-
             for (ThreadClassCalculator classifierThread : classifierThreads) {
                 classifierThread.start();
-            }
-
+			}
             for (ThreadClassCalculator classifierThread : classifierThreads) {
                 try {
-                    classifierThread.join();
                     classifierThread.join();
 
                 } catch (InterruptedException e) {
@@ -168,12 +151,8 @@ public class KMeans {
 				c.resetValuesTemp();
 			}
 		}
-		timeFininshed = System.currentTimeMillis();
-		long duration = (timeFininshed - timeStart) / 1000;
-		System.out.println();
-		System.out.println("FIM DO ALGORÍTIMO");
-		System.out.println("Executado em " + duration + " segundos");
-
+		timeFinished = System.currentTimeMillis();
+		elapsedTime = timeFinished - timeStart;
 	}
 
 	public void calculateClass(int indexInf, int indexSup) {
@@ -192,9 +171,10 @@ public class KMeans {
 			centroids[idx].incrementNumDatas();
 			centroids[idx].incrementValuesTemp(data.getValues());
 			data.setCentroid(centroids[idx]);
-
 		}
-
 	}
 
+	public long getElapsedTime(){
+		return elapsedTime;
+	}
 }

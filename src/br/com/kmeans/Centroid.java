@@ -41,14 +41,12 @@ public  class Centroid {
 	}
 	
 	public double[] getValuesTemps(){
-		
 		return valuesTemp;
 	}
 	
 	public void resetValuesTemp() {
 		numDatas = 0;
 		Arrays.fill(valuesTemp, 0);
-
 	}
 
 	//Usado para atualizar a nova posição do centroid
@@ -57,18 +55,14 @@ public  class Centroid {
 			for(int i = 0; i < valuesTemp.length; i++) {
 				valuesTemp[i] = valuesTemp[i] + newValues[i];
 			}
-
 		}
 	}
 	
 	//Usado para atualizar a nova posição do centroid
 	public void incrementNumDatas() {
 		synchronized(lockA) {
-			numDatas = numDatas + 1;//++;
-
-			
+			numDatas = numDatas + 1;
 		}
-			
 	}
 	
 	//Atualiza a nova posição do centroid. Retorna true se a posição é alterada
@@ -84,7 +78,6 @@ public  class Centroid {
 		}
 
 		return valueChanged;
-		
 	}
 
 	public void print() {
@@ -93,7 +86,6 @@ public  class Centroid {
 			if(i==0) {
 				System.out.print("(");
 			}
-
 			System.out.print(values[i] + " ");
 			if(i==values.length-1) {
 				System.out.print(")");

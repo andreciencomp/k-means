@@ -5,16 +5,16 @@ import java.util.Arrays;
 public class DataSet {
 	
 	private Data[] datas;
-	private int numDatas;
+	private int dataAmount;
 	private final double[] sumValuesData;
 	
 	public DataSet(double[][] matrixValues) {
-		numDatas = matrixValues.length;
+		dataAmount = matrixValues.length;
 		sumValuesData = new double[matrixValues[0].length];
         Arrays.fill(sumValuesData, 0f);
 		
-		datas = new Data[this.numDatas];
-		for (int i = 0; i < numDatas;i++) {
+		datas = new Data[this.dataAmount];
+		for (int i = 0; i < dataAmount; i++) {
 			Data data = new Data();
 			data.setValues(matrixValues[i]);
 			this.datas[i] = data;
@@ -30,12 +30,12 @@ public class DataSet {
 		return datas;
 	}
 	
-	public int getNumDatas() {
-		return this.numDatas;
+	public int getDataAmount() {
+		return this.dataAmount;
 	}
 
 	public void setDatas(Data[] data) {
-		this.numDatas = data.length;
+		this.dataAmount = data.length;
 		this.datas = data;
 	}
 

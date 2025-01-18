@@ -2,9 +2,9 @@ package br.com.kmeans;
 
 public class ThreadClassCalculator extends Thread {
 
-	private KMeans kmeans;
-	private int indexInf;
-	private int indexSup;
+	private final KMeans kmeans;
+	private final int indexInf;
+	private final int indexSup;
 
 	public ThreadClassCalculator(KMeans kmeans, int indexInf, int indexSup) {
 		this.kmeans = kmeans;
